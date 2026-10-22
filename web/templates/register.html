@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="lv">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Регистрация - Guide for Guides</title>
+  <title>Reģistrācija - Guide for Guides</title>
 </head>
 <body>
-  <h1>Регистрация</h1>
+  <h1>Reģistrācija</h1>
 
   {{if .Done}}
-    <p>Если этот email свободен, аккаунт создан. Подтверждение по почте добавим на следующем шаге.</p>
+    <p>Ja šis e-pasts ir brīvs, konts ir izveidots. E-pasta apstiprināšanu pievienosim nākamajā solī.</p>
   {{else}}
     {{if .Error}}<p style="color:red">{{.Error}}</p>{{end}}
     <form method="post" action="/register">
       <p>
-        <label>Email<br>
-        <input type="email" name="email" value="{{.Email}}" required autocomplete="email"></label>
+        <label>E-pasts<br>
+        <input type="email" name="email" value="{{.Email}}" required></label>
       </p>
       <p>
-        <label>Пароль (минимум 10 символов)<br>
-        <input type="password" name="password" required minlength="10" autocomplete="new-password"></label>
+        <label>Parole (vismaz 10 rakstzīmes)<br>
+        <input type="password" name="password" required minlength="10"></label>
       </p>
-      <button type="submit">Зарегистрироваться</button>
+      <button type="submit">Reģistrēties</button>
     </form>
   {{end}}
 </body>

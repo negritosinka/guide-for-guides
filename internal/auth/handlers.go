@@ -1,90 +1,95 @@
 package auth
 
 import (
-	"context"
 	"html/template"
 	"log"
 	"net/http"
 	"net/mail"
 	"strings"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// Handler хранит всё, что нужно обработчикам: базу и шаблоны
 type Handler struct {
 	Pool *pgxpool.Pool
 	Tmpl *template.Template
 }
 
-type pageData struct {
-	Error string
-	Done  bool
-	Email string
+// PageData это данные, которые мы передаём в HTML-шаблон
+type PageData struct {
+	Error string // текст ошибки
+	Done  bool   // true, если регистрация прошла
+	Email string // чтобы не стирать email в форме после ошибки
 }
 
+// RegisterForm показывает пустую форму
 func (h *Handler) RegisterForm(w http.ResponseWriter, r *http.Request) {
-	h.render(w, http.StatusOK, pageData{})
+	h.show(w, http.StatusOK, PageData{})
 }
 
+// RegisterSubmit вызывается, когда пользователь нажал кнопку
 func (h *Handler) RegisterSubmit(w http.ResponseWriter, r *http.Request) {
-	r.Body = http.MaxBytesReader(w, r.Body, 4096)
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Nederīgs pieprasījums", http.StatusBadRequest)
 		return
 	}
 
 	email := strings.TrimSpace(r.FormValue("email"))
 	password := r.FormValue("password")
 
-	if msg := validate(email, password); msg != "" {
-		h.render(w, http.StatusBadRequest, pageData{Error: msg, Email: email})
+	// 1. Проверяем данные
+	errText := checkInput(email, password)
+	if errText != "" {
+		h.show(w, http.StatusBadRequest, PageData{Error: errText, Email: email})
 		return
 	}
 
+	// 2. Делаем хеш пароля
 	hash, err := HashPassword(password)
 	if err != nil {
-		log.Println("hash error:", err)
-		http.Error(w, "internal error", http.StatusInternalServerError)
+		log.Println("ошибка хеша:", err)
+		http.Error(w, "Servera kļūda", http.StatusInternalServerError)
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
-	defer cancel()
-
-	// Если такой email уже есть, вставка молча ничего не делает.
-	_, err = h.Pool.Exec(ctx,
+	// 3. Сохраняем в базу. Если такой email уже есть, ничего не происходит.
+	_, err = h.Pool.Exec(r.Context(),
 		`INSERT INTO users (email, password_hash) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
 		email, hash)
 	if err != nil {
-		log.Println("insert user error:", err)
-		http.Error(w, "internal error", http.StatusInternalServerError)
+		log.Println("ошибка базы:", err)
+		http.Error(w, "Servera kļūda", http.StatusInternalServerError)
 		return
 	}
 
-	// Ответ одинаковый и для нового, и для уже существующего email,
-	// чтобы нельзя было узнать, кто зарегистрирован.
-	h.render(w, http.StatusOK, pageData{Done: true})
+	// 4. Ответ одинаковый для нового и для существующего email,
+	// чтобы нельзя было узнать, кто уже зарегистрирован
+	h.show(w, http.StatusOK, PageData{Done: true})
 }
 
-func validate(email, password string) string {
-	addr, err := mail.ParseAddress(email)
-	if err != nil || addr.Address != email || len(email) > 254 {
-		return "Введите корректный email."
+// checkInput возвращает текст ошибки или пустую строку, если всё хорошо
+func checkInput(email string, password string) string {
+	_, err := mail.ParseAddress(email)
+	if err != nil {
+		return "Ievadiet derīgu e-pasta adresi."
 	}
 	if len(password) < 10 {
-		return "Пароль должен быть не короче 10 символов."
+		return "Parolei jābūt vismaz 10 rakstzīmes garai."
 	}
 	if len(password) > 128 {
-		return "Пароль слишком длинный (максимум 128 символов)."
+		return "Parole ir pārāk gara (maksimums 128 rakstzīmes)."
 	}
 	return ""
 }
 
-func (h *Handler) render(w http.ResponseWriter, status int, data pageData) {
+// show выводит HTML-страницу из шаблона
+func (h *Handler) show(w http.ResponseWriter, status int, data PageData) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(status)
-	if err := h.Tmpl.ExecuteTemplate(w, "register.html", data); err != nil {
-		log.Println("template error:", err)
+	err := h.Tmpl.ExecuteTemplate(w, "register.html", data)
+	if err != nil {
+		log.Println("ошибка шаблона:", err)
 	}
 }

@@ -4,55 +4,55 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
-	"errors"
-	"fmt"
 	"strings"
 
 	"golang.org/x/crypto/argon2"
 )
 
+// Настройки Argon2id (чем больше память, тем сложнее взломать)
 const (
 	argonTime    = 2
-	argonMemory  = 64 * 1024 // 64 MB
+	argonMemory  = 64 * 1024
 	argonThreads = 2
 	argonKeyLen  = 32
-	saltLen      = 16
 )
 
-// HashPassword возвращает строку вида
-// $argon2id$v=19$m=65536,t=2,p=2$<соль>$<хеш>
-// Параметры хранятся внутри строки, поэтому их можно менять в будущем.
-func HashPassword(password string) (string, error) {
-	salt := make([]byte, saltLen)
-	if _, err := rand.Read(salt); err != nil {
-		return "", err
-	}
-	key := argon2.IDKey([]byte(password), salt, argonTime, argonMemory, argonThreads, argonKeyLen)
-	return fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
-		argon2.Version, argonMemory, argonTime, argonThreads,
-		base64.RawStdEncoding.EncodeToString(salt),
-		base64.RawStdEncoding.EncodeToString(key)), nil
+// makeKey превращает пароль + соль в хеш
+func makeKey(password string, salt []byte) []byte {
+	return argon2.IDKey([]byte(password), salt, argonTime, argonMemory, argonThreads, argonKeyLen)
 }
 
-// VerifyPassword понадобится на этапе входа.
-func VerifyPassword(password, encoded string) (bool, error) {
-	parts := strings.Split(encoded, "$")
-	if len(parts) != 6 || parts[1] != "argon2id" {
-		return false, errors.New("unsupported hash format")
-	}
-	var m, t uint32
-	var p uint8
-	if _, err := fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &m, &t, &p); err != nil {
-		return false, err
-	}
-	salt, err := base64.RawStdEncoding.DecodeString(parts[4])
+// HashPassword делает хеш для сохранения в базе.
+// Результат выглядит так: соль$хеш
+func HashPassword(password string) (string, error) {
+	// Случайная соль, у каждого пользователя своя
+	salt := make([]byte, 16)
+	_, err := rand.Read(salt)
 	if err != nil {
-		return false, err
+		return "", err
 	}
-	want, err := base64.RawStdEncoding.DecodeString(parts[5])
-	if err != nil {
-		return false, err
+
+	key := makeKey(password, salt)
+
+	saltText := base64.RawStdEncoding.EncodeToString(salt)
+	keyText := base64.RawStdEncoding.EncodeToString(key)
+	return saltText + "$" + keyText, nil
+}
+
+// CheckPassword проверяет пароль при входе (понадобится на следующих шагах)
+func CheckPassword(password string, saved string) bool {
+	parts := strings.Split(saved, "$")
+	if len(parts) != 2 {
+		return false
 	}
-	got := argon2.IDKey([]byte(password), salt, t, m, p, uint32(len(want)))
-	return subtle.ConstantTimeCompare(got, want) == 1, nil
+
+	salt, err1 := base64.RawStdEncoding.DecodeString(parts[0])
+	savedKey, err2 := base64.RawStdEncoding.DecodeString(parts[1])
+	if err1 != nil || err2 != nil {
+		return false
+	}
+
+	// Считаем хеш из введённого пароля и той же соли, потом сравниваем
+	newKey := makeKey(password, salt)
+	return subtle.ConstantTimeCompare(newKey, savedKey) == 1
 }

@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -20,36 +19,42 @@ import (
 func main() {
 	ctx := context.Background()
 
+	// Подключаемся к базе (адрес берём из docker-compose.yml)
 	pool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer pool.Close()
 
-	if err := db.Migrate(ctx, pool, migrations.FS); err != nil {
+	// Создаём таблицы, если их ещё нет
+	err = db.Migrate(ctx, pool, migrations.FS)
+	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Загружаем HTML-шаблоны
 	tmpl := template.Must(template.ParseFS(web.FS, "templates/*.html"))
-	authH := &auth.Handler{Pool: pool, Tmpl: tmpl}
 
+	authHandler := &auth.Handler{Pool: pool, Tmpl: tmpl}
+
+	// Адреса сайта: какой адрес какая функция обрабатывает
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
-		defer cancel()
-		if err := pool.Ping(ctx); err != nil {
-			http.Error(w, "db down: "+err.Error(), http.StatusServiceUnavailable)
+		err := pool.Ping(r.Context())
+		if err != nil {
+			http.Error(w, "db down", http.StatusServiceUnavailable)
 			return
 		}
 		fmt.Fprint(w, "ok")
 	})
 
-	mux.HandleFunc("GET /register", authH.RegisterForm)
-	mux.HandleFunc("POST /register", authH.RegisterSubmit)
+	mux.HandleFunc("GET /register", authHandler.RegisterForm)
+	mux.HandleFunc("POST /register", authHandler.RegisterSubmit)
 
+	// {$} значит "только главная страница"
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "Hello! Guide for Guides is running. Go to /register")
+		fmt.Fprint(w, "Sveiki! Guide for Guides darbojas. Dodieties uz /register")
 	})
 
 	log.Println("listening on :8080")
