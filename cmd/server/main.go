@@ -9,14 +9,23 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"guide-for-guides/internal/db"
+	"guide-for-guides/migrations"
 )
 
 func main() {
-	pool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
+	ctx := context.Background()
+
+	pool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer pool.Close()
+
+	if err := db.Migrate(ctx, pool, migrations.FS); err != nil {
+		log.Fatal(err)
+	}
 
 	mux := http.NewServeMux()
 
