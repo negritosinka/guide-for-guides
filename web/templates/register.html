@@ -9,7 +9,7 @@
   <h1>Reģistrācija</h1>
 
   {{if .Done}}
-    <p>Ja šis e-pasts ir brīvs, konts ir izveidots. E-pasta apstiprināšanu pievienosim nākamajā solī.</p>
+    <p>Ja šis e-pasts ir brīvs, konts ir izveidots. Pārbaudiet savu e-pastu un apstipriniet adresi.</p>
   {{else}}
     {{if .Error}}<p style="color:red">{{.Error}}</p>{{end}}
     <form method="post" action="/register">

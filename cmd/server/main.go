@@ -35,7 +35,13 @@ func main() {
 	// Загружаем HTML-шаблоны
 	tmpl := template.Must(template.ParseFS(web.FS, "templates/*.html"))
 
-	authHandler := &auth.Handler{Pool: pool, Tmpl: tmpl}
+	// Адрес сайта для ссылок в письмах. Локально это localhost.
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		baseURL = "http://localhost:8080"
+	}
+
+	authHandler := &auth.Handler{Pool: pool, Tmpl: tmpl, BaseURL: baseURL}
 
 	// Адреса сайта: какой адрес какая функция обрабатывает
 	mux := http.NewServeMux()
@@ -50,6 +56,7 @@ func main() {
 	})
 
 	mux.HandleFunc("GET /register", authHandler.RegisterForm)
+	mux.HandleFunc("GET /verify", authHandler.Verify)
 	mux.HandleFunc("POST /register", authHandler.RegisterSubmit)
 
 	// {$} значит "только главная страница"
