@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -10,8 +11,10 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"guide-for-guides/internal/auth"
 	"guide-for-guides/internal/db"
 	"guide-for-guides/migrations"
+	"guide-for-guides/web"
 )
 
 func main() {
@@ -27,9 +30,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	tmpl := template.Must(template.ParseFS(web.FS, "templates/*.html"))
+	authH := &auth.Handler{Pool: pool, Tmpl: tmpl}
+
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
 		if err := pool.Ping(ctx); err != nil {
@@ -39,8 +45,11 @@ func main() {
 		fmt.Fprint(w, "ok")
 	})
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "Hello! Guide for Guides is running. Check /health for the database.")
+	mux.HandleFunc("GET /register", authH.RegisterForm)
+	mux.HandleFunc("POST /register", authH.RegisterSubmit)
+
+	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Hello! Guide for Guides is running. Go to /register")
 	})
 
 	log.Println("listening on :8080")
