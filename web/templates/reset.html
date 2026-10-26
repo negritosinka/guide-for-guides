@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jauna parole - Guide for Guides</title>
+</head>
+<body>
+  <h1>Jauna parole</h1>
+
+  {{if .Error}}<p style="color:red">{{.Error}}</p>{{end}}
+
+  <form method="post" action="/reset">
+    <input type="hidden" name="token" value="{{.Token}}">
+    <p>
+      <label>Jaunā parole (vismaz 10 rakstzīmes)<br>
+      <input type="password" name="password" required minlength="10"></label>
+    </p>
+    <button type="submit">Nomainīt paroli</button>
+  </form>
+</body>
+</html>

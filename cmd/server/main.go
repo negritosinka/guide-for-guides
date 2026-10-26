@@ -64,6 +64,11 @@ func main() {
 	mux.HandleFunc("GET /account", authHandler.Account)
 	mux.HandleFunc("POST /logout", authHandler.Logout)
 
+	mux.HandleFunc("GET /forgot", authHandler.ForgotForm)
+	mux.HandleFunc("POST /forgot", authHandler.ForgotSubmit)
+	mux.HandleFunc("GET /reset", authHandler.ResetForm)
+	mux.HandleFunc("POST /reset", authHandler.ResetSubmit)
+
 	// {$} значит "только главная страница"
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "Sveiki! Guide for Guides darbojas. Dodieties uz /register vai /login")

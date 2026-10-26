@@ -40,6 +40,15 @@ func (h *Handler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(r.FormValue("email"))
 	password := r.FormValue("password")
 
+	// Слишком много неудачных попыток? Тогда пароль даже не проверяем.
+	if h.tooManyAttempts(r, email) {
+		h.showLogin(w, http.StatusTooManyRequests, LoginData{
+			Error: "Pārāk daudz mēģinājumu. Mēģiniet vēlreiz pēc 15 minūtēm.",
+			Email: email,
+		})
+		return
+	}
+
 	// 1. Ищем пользователя по email (без учёта регистра букв)
 	var userID int64
 	var hash string
@@ -55,7 +64,7 @@ func (h *Handler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 		// Пользователя нет. Всё равно считаем хеш, чтобы ответ шёл
 		// столько же времени, как и для настоящего пользователя.
 		HashPassword("neeksistējošs-lietotājs")
-		h.showLogin(w, http.StatusUnauthorized, LoginData{Error: loginError, Email: email})
+		h.loginFailed(w, r, email)
 		return
 	}
 	if err != nil {
@@ -66,9 +75,14 @@ func (h *Handler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 
 	// 2. Проверяем пароль
 	if !CheckPassword(password, hash) {
-		h.showLogin(w, http.StatusUnauthorized, LoginData{Error: loginError, Email: email})
+		h.loginFailed(w, r, email)
 		return
 	}
+
+	// Пароль верный: стираем неудачные попытки этого email
+	h.Pool.Exec(r.Context(),
+		`DELETE FROM login_attempts WHERE email_hash = $1`,
+		HashToken(strings.ToLower(email)))
 
 	// 3. Пароль верный. Теперь можно честно сказать, что не так с аккаунтом.
 	if bannedAt != nil {
