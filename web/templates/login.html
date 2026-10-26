@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ieiet - Guide for Guides</title>
+</head>
+<body>
+  <h1>Ieiet</h1>
+
+  {{if .Error}}<p style="color:red">{{.Error}}</p>{{end}}
+
+  <form method="post" action="/login">
+    <p>
+      <label>E-pasts<br>
+      <input type="email" name="email" value="{{.Email}}" required></label>
+    </p>
+    <p>
+      <label>Parole<br>
+      <input type="password" name="password" required></label>
+    </p>
+    <button type="submit">Ieiet</button>
+  </form>
+
+  <p>Nav konta? <a href="/register">Reģistrēties</a></p>
+</body>
+</html>
