@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Žurnāls - Guide for Guides</title>
+</head>
+<body>
+  <h1>Darbību žurnāls</h1>
+  <p><a href="/admin">Atpakaļ</a></p>
+
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>Laiks</th><th>Kas</th><th>Darbība</th><th>Mērķis</th><th>Detaļas</th>
+    </tr>
+    {{range .Rows}}
+    <tr>
+      <td>{{.Time}}</td>
+      <td>{{.Who}}</td>
+      <td>{{.Action}}</td>
+      <td>{{.Target}}</td>
+      <td>{{.Details}}</td>
+    </tr>
+    {{end}}
+  </table>
+</body>
+</html>

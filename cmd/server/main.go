@@ -10,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"guide-for-guides/internal/admin"
 	"guide-for-guides/internal/auth"
 	"guide-for-guides/internal/db"
 	"guide-for-guides/migrations"
@@ -42,6 +43,7 @@ func main() {
 	}
 
 	authHandler := &auth.Handler{Pool: pool, Tmpl: tmpl, BaseURL: baseURL}
+	adminHandler := &admin.Handler{Pool: pool, Tmpl: tmpl, Auth: authHandler}
 
 	// Адреса сайта: какой адрес какая функция обрабатывает
 	mux := http.NewServeMux()
@@ -68,6 +70,12 @@ func main() {
 	mux.HandleFunc("POST /forgot", authHandler.ForgotSubmit)
 	mux.HandleFunc("GET /reset", authHandler.ResetForm)
 	mux.HandleFunc("POST /reset", authHandler.ResetSubmit)
+
+	mux.HandleFunc("GET /admin", adminHandler.Dashboard)
+	mux.HandleFunc("GET /admin/users", adminHandler.Users)
+	mux.HandleFunc("POST /admin/users/role", adminHandler.ChangeRole)
+	mux.HandleFunc("POST /admin/users/ban", adminHandler.ChangeBan)
+	mux.HandleFunc("GET /admin/log", adminHandler.Log)
 
 	// {$} значит "только главная страница"
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {

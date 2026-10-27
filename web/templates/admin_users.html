@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lietotāji - Guide for Guides</title>
+</head>
+<body>
+  <h1>Lietotāji</h1>
+  <p><a href="/admin">Atpakaļ</a></p>
+
+  {{if .Error}}<p style="color:red">{{.Error}}</p>{{end}}
+
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>ID</th><th>E-pasts</th><th>Lomas</th><th>Bloķēts</th><th>Darbības</th>
+    </tr>
+    {{range .Users}}
+    <tr>
+      <td>{{.ID}}</td>
+      <td>{{.Email}}</td>
+      <td>{{.Roles}}</td>
+      <td>{{if .Banned}}jā{{else}}nē{{end}}</td>
+      <td>
+        <form method="post" action="/admin/users/role">
+          <input type="hidden" name="user_id" value="{{.ID}}">
+          <button type="submit" name="action" value="grant">Piešķirt moderatoru</button>
+          <button type="submit" name="action" value="revoke">Atņemt moderatoru</button>
+        </form>
+        <form method="post" action="/admin/users/ban">
+          <input type="hidden" name="user_id" value="{{.ID}}">
+          <button type="submit" name="action" value="ban">Bloķēt</button>
+          <button type="submit" name="action" value="unban">Atbloķēt</button>
+        </form>
+      </td>
+    </tr>
+    {{end}}
+  </table>
+</body>
+</html>
