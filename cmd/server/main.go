@@ -12,6 +12,7 @@ import (
 
 	"guide-for-guides/internal/admin"
 	"guide-for-guides/internal/auth"
+	"guide-for-guides/internal/boards"
 	"guide-for-guides/internal/db"
 	"guide-for-guides/migrations"
 	"guide-for-guides/web"
@@ -32,6 +33,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Заносим доски из списка в базу
+	err = boards.Sync(ctx, pool)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Загружаем HTML-шаблоны
 	tmpl := template.Must(template.ParseFS(web.FS, "templates/*.html"))
@@ -44,6 +50,7 @@ func main() {
 
 	authHandler := &auth.Handler{Pool: pool, Tmpl: tmpl, BaseURL: baseURL}
 	adminHandler := &admin.Handler{Pool: pool, Tmpl: tmpl, Auth: authHandler}
+	boardsHandler := &boards.Handler{Pool: pool, Tmpl: tmpl, Auth: authHandler}
 
 	// Адреса сайта: какой адрес какая функция обрабатывает
 	mux := http.NewServeMux()
@@ -77,9 +84,14 @@ func main() {
 	mux.HandleFunc("POST /admin/users/ban", adminHandler.ChangeBan)
 	mux.HandleFunc("GET /admin/log", adminHandler.Log)
 
+	mux.HandleFunc("GET /boards", boardsHandler.List)
+	mux.HandleFunc("GET /boards/{slug}", boardsHandler.Show)
+	mux.HandleFunc("GET /admin/boards", adminHandler.Boards)
+	mux.HandleFunc("POST /admin/boards/update", adminHandler.UpdateBoard)
+
 	// {$} значит "только главная страница"
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "Sveiki! Guide for Guides darbojas. Dodieties uz /register vai /login")
+		fmt.Fprint(w, "Sveiki! Guide for Guides darbojas. Dodieties uz /boards, /register vai /login")
 	})
 
 	log.Println("listening on :8080")

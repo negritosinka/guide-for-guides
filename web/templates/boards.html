@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sadaļas - Guide for Guides</title>
+</head>
+<body>
+  <h1>Sadaļas</h1>
+
+  {{range .Boards}}
+    <h2><a href="/boards/{{.Slug}}">{{.Name}}</a></h2>
+    <p>{{.Description}}</p>
+  {{else}}
+    <p>Pašlaik nav pieejamu sadaļu.</p>
+  {{end}}
+
+  <p><a href="/">Uz sākumlapu</a></p>
+</body>
+</html>

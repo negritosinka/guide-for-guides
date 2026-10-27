@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sadaļas - Administrācija</title>
+</head>
+<body>
+  <h1>Sadaļu pārvaldība</h1>
+  <p><a href="/admin">Atpakaļ</a></p>
+
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>Nosaukums</th><th>Izmanto</th><th>Izmanto citi</th><th>Iestatījumi</th>
+    </tr>
+    {{range .Boards}}
+    <tr>
+      <td>{{.Name}}</td>
+      <td>{{.Uses}}</td>
+      <td>{{.UsedBy}}</td>
+      <td>
+        <form method="post" action="/admin/boards/update">
+          <input type="hidden" name="board_id" value="{{.ID}}">
+          <select name="status">
+            <option value="active" {{if eq .Status "active"}}selected{{end}}>Darbojas</option>
+            <option value="maintenance" {{if eq .Status "maintenance"}}selected{{end}}>Apkope (tikai personālam)</option>
+            <option value="disabled" {{if eq .Status "disabled"}}selected{{end}}>Izslēgta</option>
+          </select>
+          <select name="required_role">
+            <option value="" {{if eq .RequiredRole ""}}selected{{end}}>Visiem</option>
+            <option value="moderator" {{if eq .RequiredRole "moderator"}}selected{{end}}>Tikai moderatoriem</option>
+            <option value="admin" {{if eq .RequiredRole "admin"}}selected{{end}}>Tikai administratoriem</option>
+          </select>
+          <button type="submit">Saglabāt</button>
+        </form>
+      </td>
+    </tr>
+    {{end}}
+  </table>
+</body>
+</html>
