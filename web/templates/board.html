@@ -3,17 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{.Name}} - Guide for Guides</title>
+  <title>{{.Board.Name}} - Guide for Guides</title>
 </head>
 <body>
-  <h1>{{.Name}}</h1>
-  <p>{{.Description}}</p>
+  <h1>{{.Board.Name}}</h1>
+  <p>{{.Board.Description}}</p>
 
-  {{if eq .Status "maintenance"}}
+  {{if eq .Board.Status "maintenance"}}
     <p style="color:orange">Šī sadaļa ir apkopes režīmā, to redz tikai personāls.</p>
   {{end}}
 
-  <p>Šeit drīz būs pamācības.</p>
+  {{range .Tutorials}}
+    <p>
+      <a href="{{.URL}}" target="_blank" rel="noopener nofollow">{{.Title}}</a><br>
+      Avots: {{.Source}}
+      {{if .Categories}} | Kategorijas: {{range .Categories}}{{.}} {{end}}{{end}}
+    </p>
+  {{else}}
+    <p>Pagaidām nav pamācību.</p>
+  {{end}}
 
   <p><a href="/boards">Visas sadaļas</a></p>
 </body>

@@ -152,7 +152,7 @@ func (h *Handler) Show(w http.ResponseWriter, r *http.Request) {
 			Text:  "Jums nav piekļuves šai sadaļai.",
 		})
 	default:
-		h.page(w, http.StatusOK, "board.html", b)
+		h.page(w, http.StatusOK, "board.html", BoardPage{Board: b, Tutorials: h.tutorialsOf(r, b.Slug)})
 	}
 }
 

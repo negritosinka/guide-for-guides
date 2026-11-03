@@ -14,8 +14,10 @@ import (
 	"guide-for-guides/internal/auth"
 	"guide-for-guides/internal/boards"
 	"guide-for-guides/internal/db"
+	"guide-for-guides/internal/scanner"
 	"guide-for-guides/migrations"
 	"guide-for-guides/web"
+	"time"
 )
 
 func main() {
@@ -38,6 +40,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Запускаем сканер в фоне: сразу и потом каждые 6 часов
+	parsers := []scanner.Parser{
+		scanner.DemoParser{},
+	}
+	go scanner.Schedule(ctx, pool, parsers, 6*time.Hour)
 
 	// Загружаем HTML-шаблоны
 	tmpl := template.Must(template.ParseFS(web.FS, "templates/*.html"))
