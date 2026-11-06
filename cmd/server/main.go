@@ -99,9 +99,11 @@ func main() {
 	mux.HandleFunc("GET /admin/boards", adminHandler.Boards)
 	mux.HandleFunc("POST /admin/boards/update", adminHandler.UpdateBoard)
 
+	mux.HandleFunc("GET /search", boardsHandler.Search)
+
 	// {$} значит "только главная страница"
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "Sveiki! Guide for Guides darbojas. Dodieties uz /boards, /register vai /login")
+		fmt.Fprint(w, "Sveiki! Guide for Guides darbojas. Dodieties uz /search, /boards, /register vai /login")
 	})
 
 	log.Println("listening on :8080")

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meklēšana - Guide for Guides</title>
+</head>
+<body>
+  <h1>Pamācību meklēšana</h1>
+
+  <form method="get" action="/search">
+    <input type="text" name="q" value="{{.Query}}" placeholder="Ko meklējat?" maxlength="100">
+    <button type="submit">Meklēt</button>
+  </form>
+
+  <p>
+    Kārtot:
+    {{range .SortLinks}}
+      {{if .Active}}<strong>{{.Name}}</strong>{{else}}<a href="{{.Link}}">{{.Name}}</a>{{end}}
+    {{end}}
+  </p>
+
+  <div style="display:flex; gap:40px; flex-wrap:wrap">
+
+    <div>
+      {{if .HasFilters}}<p><a href="{{.ClearLink}}">Notīrīt filtrus</a></p>{{end}}
+
+      {{if .BoardsF}}
+        <h3>Sadaļa</h3>
+        <ul>
+          {{range .BoardsF}}
+            <li>
+              {{if .Active}}<strong>{{.Name}} ({{.Count}})</strong> <a href="{{.Link}}">×</a>
+              {{else}}<a href="{{.Link}}">{{.Name}}</a> ({{.Count}}){{end}}
+            </li>
+          {{end}}
+        </ul>
+      {{end}}
+
+      {{if .SourcesF}}
+        <h3>Avots</h3>
+        <ul>
+          {{range .SourcesF}}
+            <li>
+              {{if .Active}}<strong>{{.Name}} ({{.Count}})</strong> <a href="{{.Link}}">×</a>
+              {{else}}<a href="{{.Link}}">{{.Name}}</a> ({{.Count}}){{end}}
+            </li>
+          {{end}}
+        </ul>
+      {{end}}
+
+      {{if .CategoriesF}}
+        <h3>Kategorija</h3>
+        <ul>
+          {{range .CategoriesF}}
+            <li>
+              {{if .Active}}<strong>{{.Name}} ({{.Count}})</strong> <a href="{{.Link}}">×</a>
+              {{else}}<a href="{{.Link}}">{{.Name}}</a> ({{.Count}}){{end}}
+            </li>
+          {{end}}
+        </ul>
+      {{end}}
+    </div>
+
+    <div>
+      <p>Atrasts: {{.Total}} (rāda līdz 50)</p>
+
+      {{range .Results}}
+        <p>
+          <a href="{{.URL}}" target="_blank" rel="noopener nofollow">{{.Title}}</a><br>
+          Sadaļa: {{.Board}} | Avots: {{.Source}}
+          {{if .Categories}} | {{range .Categories}}{{.}} {{end}}{{end}}
+        </p>
+      {{else}}
+        <p>Nekas netika atrasts.</p>
+      {{end}}
+    </div>
+
+  </div>
+
+  <p><a href="/boards">Visas sadaļas</a> | <a href="/">Sākumlapa</a></p>
+</body>
+</html>
