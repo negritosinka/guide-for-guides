@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}} - Guide for Guides</title>
+</head>
+<body>
+  <h1>{{.Title}}</h1>
+
+  <p>
+    Sadaļa: <a href="/boards/{{.BoardSlug}}">{{.BoardName}}</a> |
+    Avots: {{.Source}}
+    {{if .Categories}} | Kategorijas: {{range .Categories}}{{.}} {{end}}{{end}}
+  </p>
+
+  <p>
+    <a href="{{.URL}}" target="_blank" rel="noopener nofollow"><strong>Atvērt oriģinālu →</strong></a>
+  </p>
+
+  {{if .LoggedIn}}
+    <form method="post" action="/tutorials/{{.ID}}/bookmark">
+      {{if .Bookmarked}}
+        <button type="submit" name="action" value="remove">Noņemt no grāmatzīmēm</button>
+      {{else}}
+        <button type="submit" name="action" value="add">Saglabāt grāmatzīmēs</button>
+      {{end}}
+    </form>
+  {{else}}
+    <p>Lai saglabātu grāmatzīmi vai uzrakstītu atsauksmi, lūdzu, <a href="/login">ieejiet</a>.</p>
+  {{end}}
+
+  <h2>Atsauksmes</h2>
+
+  {{if .ReviewCount}}
+    <p>Vidējais vērtējums: <strong>{{.Average}}</strong> / 5 ({{.ReviewCount}})</p>
+  {{else}}
+    <p>Vēl nav atsauksmju.</p>
+  {{end}}
+
+  {{if .LoggedIn}}
+    {{if .Error}}<p style="color:red">{{.Error}}</p>{{end}}
+
+    <form method="post" action="/tutorials/{{.ID}}/review">
+      <p>
+        <label>Jūsu vērtējums<br>
+        <select name="rating" required>
+          <option value="">-</option>
+          <option value="1" {{if eq .MyRating 1}}selected{{end}}>1</option>
+          <option value="2" {{if eq .MyRating 2}}selected{{end}}>2</option>
+          <option value="3" {{if eq .MyRating 3}}selected{{end}}>3</option>
+          <option value="4" {{if eq .MyRating 4}}selected{{end}}>4</option>
+          <option value="5" {{if eq .MyRating 5}}selected{{end}}>5</option>
+        </select></label>
+      </p>
+      <p>
+        <label>Komentārs (nav obligāts, līdz 1000 rakstzīmēm)<br>
+        <textarea name="body" rows="4" cols="50" maxlength="1000">{{.MyBody}}</textarea></label>
+      </p>
+      <button type="submit">Saglabāt atsauksmi</button>
+    </form>
+
+    {{if .MyRating}}
+      <form method="post" action="/tutorials/{{.ID}}/review/delete">
+        <button type="submit">Dzēst manu atsauksmi</button>
+      </form>
+    {{end}}
+  {{end}}
+
+  {{range .Reviews}}
+    <div style="margin-top:15px">
+      <strong>{{.Author}}</strong>{{if .Mine}} (jūs){{end}} | {{.Rating}} / 5 | {{.Date}}
+      {{if .Body}}<p style="white-space:pre-wrap">{{.Body}}</p>{{end}}
+    </div>
+  {{end}}
+
+  <p><a href="/search">Meklēšana</a> | <a href="/boards">Visas sadaļas</a></p>
+</body>
+</html>

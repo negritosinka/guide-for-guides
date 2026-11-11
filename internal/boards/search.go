@@ -47,6 +47,7 @@ type FacetItem struct {
 
 // SearchResult это один найденный туториал
 type SearchResult struct {
+	ID         int64
 	Title      string
 	URL        string
 	Source     string
@@ -246,7 +247,7 @@ func (h *Handler) Search(w http.ResponseWriter, r *http.Request) {
 
 	// 4. Сами результаты (первые 50)
 	rows, err := h.Pool.Query(r.Context(),
-		`SELECT v.title, t.url, s.name, b.name, v.categories `+searchFrom+searchFilters+
+		`SELECT t.id, v.title, t.url, s.name, b.name, v.categories `+searchFrom+searchFilters+
 			` ORDER BY `+orderBy+` LIMIT 50`,
 		ids, pattern, f.Board, f.Source, f.Category)
 	if err != nil {
@@ -258,7 +259,7 @@ func (h *Handler) Search(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var res SearchResult
-		err := rows.Scan(&res.Title, &res.URL, &res.Source, &res.Board, &res.Categories)
+		err := rows.Scan(&res.ID, &res.Title, &res.URL, &res.Source, &res.Board, &res.Categories)
 		if err != nil {
 			log.Println("ошибка чтения строки:", err)
 			continue

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manas grāmatzīmes - Guide for Guides</title>
+</head>
+<body>
+  <h1>Manas grāmatzīmes</h1>
+
+  {{range .Items}}
+    <p>
+      <a href="/tutorials/{{.ID}}">{{.Title}}</a><br>
+      Sadaļa: {{.Board}} | Avots: {{.Source}}
+    </p>
+  {{else}}
+    <p>Jums vēl nav grāmatzīmju.</p>
+  {{end}}
+
+  <p><a href="/account">Mans konts</a> | <a href="/search">Meklēšana</a></p>
+</body>
+</html>

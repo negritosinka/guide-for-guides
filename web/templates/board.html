@@ -15,8 +15,8 @@
 
   {{range .Tutorials}}
     <p>
-      <a href="{{.URL}}" target="_blank" rel="noopener nofollow">{{.Title}}</a><br>
-      Avots: {{.Source}}
+      <a href="/tutorials/{{.ID}}">{{.Title}}</a><br>
+      Avots: {{.Source}} | <a href="{{.URL}}" target="_blank" rel="noopener nofollow">Oriģināls</a>
       {{if .Categories}} | Kategorijas: {{range .Categories}}{{.}} {{end}}{{end}}
     </p>
   {{else}}

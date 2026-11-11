@@ -67,8 +67,9 @@
 
       {{range .Results}}
         <p>
-          <a href="{{.URL}}" target="_blank" rel="noopener nofollow">{{.Title}}</a><br>
-          Sadaļa: {{.Board}} | Avots: {{.Source}}
+          <a href="/tutorials/{{.ID}}">{{.Title}}</a><br>
+          Sadaļa: {{.Board}} | Avots: {{.Source}} |
+          <a href="{{.URL}}" target="_blank" rel="noopener nofollow">Oriģināls</a>
           {{if .Categories}} | {{range .Categories}}{{.}} {{end}}{{end}}
         </p>
       {{else}}

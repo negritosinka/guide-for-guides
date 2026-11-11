@@ -101,6 +101,12 @@ func main() {
 
 	mux.HandleFunc("GET /search", boardsHandler.Search)
 
+	mux.HandleFunc("GET /tutorials/{id}", boardsHandler.Tutorial)
+	mux.HandleFunc("POST /tutorials/{id}/bookmark", boardsHandler.Bookmark)
+	mux.HandleFunc("POST /tutorials/{id}/review", boardsHandler.Review)
+	mux.HandleFunc("POST /tutorials/{id}/review/delete", boardsHandler.DeleteReview)
+	mux.HandleFunc("GET /bookmarks", boardsHandler.Bookmarks)
+
 	// {$} значит "только главная страница"
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "Sveiki! Guide for Guides darbojas. Dodieties uz /search, /boards, /register vai /login")
