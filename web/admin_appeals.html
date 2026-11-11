@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apelācijas - Administrācija</title>
+</head>
+<body>
+  <h1>Apelācijas</h1>
+  <p><a href="/admin">Atpakaļ</a></p>
+
+  {{range .Rows}}
+    <div style="border:1px solid #888; padding:10px; margin:10px 0">
+      <p>
+        <strong>#{{.ID}}</strong> | lietotājs #{{.UserID}} | {{.Date}} |
+        karodziņi: {{.Flags}} | {{if .Banned}}bloķēts{{else}}nav bloķēts{{end}}
+      </p>
+
+      {{if .ReviewID}}
+        <p>Apelācija par noņemto atsauksmi #{{.ReviewID}} ({{.ReviewRating}}/5):</p>
+        <blockquote style="white-space:pre-wrap">{{.ReviewBody}}</blockquote>
+      {{else}}
+        <p>Apelācija par konta bloķēšanu.</p>
+      {{end}}
+
+      <p>Lietotāja paskaidrojums:</p>
+      <p style="white-space:pre-wrap">{{.Message}}</p>
+
+      <form method="post" action="/admin/appeals/{{.ID}}/resolve">
+        <button type="submit" name="action" value="accept">
+          Apstiprināt ({{if .ReviewID}}atjaunot atsauksmi, noņemt karodziņu{{else}}atbloķēt kontu{{end}})
+        </button>
+        <button type="submit" name="action" value="reject">Noraidīt</button>
+      </form>
+    </div>
+  {{else}}
+    <p>Nav atvērtu apelāciju.</p>
+  {{end}}
+</body>
+</html>

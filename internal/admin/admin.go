@@ -15,9 +15,10 @@ import (
 
 // Handler хранит всё, что нужно страницам админки
 type Handler struct {
-	Pool *pgxpool.Pool
-	Tmpl *template.Template
-	Auth *auth.Handler // нужен, чтобы узнать, кто вошёл
+	Pool     *pgxpool.Pool
+	Tmpl     *template.Template
+	Auth     *auth.Handler // нужен, чтобы узнать, кто вошёл
+	MaxFlags int           // после стольких флагов аккаунт блокируется
 }
 
 // hasRole проверяет, есть ли у пользователя роль

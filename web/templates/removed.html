@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Noņemtās atsauksmes - Guide for Guides</title>
+</head>
+<body>
+  <h1>Noņemtās atsauksmes</h1>
+
+  {{range .Items}}
+    <div style="border:1px solid #888; padding:10px; margin:10px 0">
+      <p>{{.Title}} | noņemta {{.Date}}</p>
+
+      {{if eq .Status "open"}}
+        <p>Apelācija iesniegta, tā tiek izskatīta.</p>
+      {{else if eq .Status "rejected"}}
+        <p>Apelācija noraidīta.</p>
+      {{else}}
+        <form method="post" action="/appeals/review">
+          <input type="hidden" name="review_id" value="{{.ReviewID}}">
+          <p>
+            <label>Kāpēc atsauksme būtu jāatjauno? (10 līdz 1000 rakstzīmes)<br>
+            <textarea name="message" rows="4" cols="50" maxlength="1000" required></textarea></label>
+          </p>
+          <button type="submit">Iesniegt apelāciju</button>
+        </form>
+      {{end}}
+    </div>
+  {{else}}
+    <p>Jums nav noņemtu atsauksmju.</p>
+  {{end}}
+
+  <p><a href="/account">Mans konts</a></p>
+</body>
+</html>

@@ -8,15 +8,15 @@
 <body>
   <h1>Administrācijas panelis</h1>
 
-  {{if .IsAdmin}}
-    <ul>
+  <ul>
+    <li><a href="/admin/reports">Ziņojumi un sūdzības</a></li>
+    <li><a href="/admin/appeals">Apelācijas</a></li>
+    {{if .IsAdmin}}
       <li><a href="/admin/users">Lietotāji</a></li>
-      <li><a href="/admin/log">Darbību žurnāls</a></li>
       <li><a href="/admin/boards">Sadaļas</a></li>
-    </ul>
-  {{else}}
-    <p>Moderatora rīki parādīsies šeit vēlāk.</p>
-  {{end}}
+      <li><a href="/admin/log">Darbību žurnāls</a></li>
+    {{end}}
+  </ul>
 
   <p><a href="/account">Mans konts</a></p>
 </body>

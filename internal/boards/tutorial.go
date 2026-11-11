@@ -23,6 +23,7 @@ type tutorialInfo struct {
 
 // ReviewRow это один отзыв на странице
 type ReviewRow struct {
+	ID     int64
 	Author string
 	Rating int
 	Body   string
@@ -144,7 +145,7 @@ func (h *Handler) showTutorial(w http.ResponseWriter, r *http.Request, t tutoria
 
 	// Сами отзывы (последние 50)
 	rows, err := h.Pool.Query(r.Context(),
-		`SELECT user_id, rating, body, created_at FROM reviews
+		`SELECT id, user_id, rating, body, created_at FROM reviews
 		 WHERE tutorial_id = $1 AND removed_at IS NULL
 		 ORDER BY id DESC LIMIT 50`, t.ID)
 	if err != nil {
@@ -156,7 +157,7 @@ func (h *Handler) showTutorial(w http.ResponseWriter, r *http.Request, t tutoria
 			var created time.Time
 			var rv ReviewRow
 
-			err := rows.Scan(&authorID, &rv.Rating, &rv.Body, &created)
+			err := rows.Scan(&rv.ID, &authorID, &rv.Rating, &rv.Body, &created)
 			if err != nil {
 				log.Println("ошибка чтения строки:", err)
 				continue

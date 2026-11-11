@@ -14,9 +14,11 @@ import (
 	"guide-for-guides/internal/auth"
 	"guide-for-guides/internal/boards"
 	"guide-for-guides/internal/db"
+	"guide-for-guides/internal/moderation"
 	"guide-for-guides/internal/scanner"
 	"guide-for-guides/migrations"
 	"guide-for-guides/web"
+	"strconv"
 	"time"
 )
 
@@ -59,8 +61,17 @@ func main() {
 	}
 
 	authHandler := &auth.Handler{Pool: pool, Tmpl: tmpl, BaseURL: baseURL}
-	adminHandler := &admin.Handler{Pool: pool, Tmpl: tmpl, Auth: authHandler}
 	boardsHandler := &boards.Handler{Pool: pool, Tmpl: tmpl, Auth: authHandler}
+
+	// Сколько флагов приводит к блокировке (по умолчанию 3)
+	maxFlags := 3
+	value, err := strconv.Atoi(os.Getenv("MAX_FLAGS"))
+	if err == nil && value > 0 {
+		maxFlags = value
+	}
+
+	adminHandler := &admin.Handler{Pool: pool, Tmpl: tmpl, Auth: authHandler, MaxFlags: maxFlags}
+	moderationHandler := &moderation.Handler{Pool: pool, Tmpl: tmpl, Auth: authHandler}
 
 	// Адреса сайта: какой адрес какая функция обрабатывает
 	mux := http.NewServeMux()
@@ -106,6 +117,20 @@ func main() {
 	mux.HandleFunc("POST /tutorials/{id}/review", boardsHandler.Review)
 	mux.HandleFunc("POST /tutorials/{id}/review/delete", boardsHandler.DeleteReview)
 	mux.HandleFunc("GET /bookmarks", boardsHandler.Bookmarks)
+
+	mux.HandleFunc("GET /reviews/{id}/report", moderationHandler.ReportForm)
+	mux.HandleFunc("POST /reviews/{id}/report", moderationHandler.ReportSubmit)
+	mux.HandleFunc("GET /bug", moderationHandler.BugForm)
+	mux.HandleFunc("POST /bug", moderationHandler.BugSubmit)
+	mux.HandleFunc("GET /my/removed", moderationHandler.Removed)
+	mux.HandleFunc("POST /appeals/review", moderationHandler.AppealReview)
+	mux.HandleFunc("GET /appeal", moderationHandler.BanAppealForm)
+	mux.HandleFunc("POST /appeal", moderationHandler.BanAppealSubmit)
+
+	mux.HandleFunc("GET /admin/reports", adminHandler.Reports)
+	mux.HandleFunc("POST /admin/reports/{id}/resolve", adminHandler.ResolveReport)
+	mux.HandleFunc("GET /admin/appeals", adminHandler.Appeals)
+	mux.HandleFunc("POST /admin/appeals/{id}/resolve", adminHandler.ResolveAppeal)
 
 	// {$} значит "только главная страница"
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {

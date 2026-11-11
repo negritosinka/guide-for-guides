@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ziņot par kļūdu - Guide for Guides</title>
+</head>
+<body>
+  <h1>Ziņot par kļūdu vietnē</h1>
+
+  {{if .Error}}<p style="color:red">{{.Error}}</p>{{end}}
+
+  <form method="post" action="/bug">
+    <p>
+      <label>Kas nogāja greizi? (10 līdz 1000 rakstzīmes)<br>
+      <textarea name="details" rows="6" cols="50" maxlength="1000" required>{{.Details}}</textarea></label>
+    </p>
+    <button type="submit">Nosūtīt</button>
+  </form>
+
+  <p><a href="/account">Mans konts</a></p>
+</body>
+</html>

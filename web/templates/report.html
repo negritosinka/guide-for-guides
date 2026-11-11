@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ziņot par atsauksmi - Guide for Guides</title>
+</head>
+<body>
+  <h1>Ziņot par atsauksmi</h1>
+
+  {{if .Error}}<p style="color:red">{{.Error}}</p>{{end}}
+
+  <form method="post" action="/reviews/{{.ReviewID}}/report">
+    <p>
+      <label>Iemesls<br>
+      <select name="reason" required>
+        <option value="">-</option>
+        <option value="spam">Surogātpasts vai reklāma</option>
+        <option value="abuse">Aizvainojošs saturs</option>
+        <option value="offtopic">Nav par tēmu</option>
+        <option value="other">Cits iemesls</option>
+      </select></label>
+    </p>
+    <p>
+      <label>Paskaidrojums (nav obligāts, līdz 500 rakstzīmēm)<br>
+      <textarea name="details" rows="4" cols="50" maxlength="500"></textarea></label>
+    </p>
+    <button type="submit">Nosūtīt</button>
+  </form>
+
+  <p><a href="/tutorials/{{.TutorialID}}">Atpakaļ</a></p>
+</body>
+</html>

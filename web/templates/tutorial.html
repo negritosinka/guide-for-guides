@@ -70,6 +70,7 @@
   {{range .Reviews}}
     <div style="margin-top:15px">
       <strong>{{.Author}}</strong>{{if .Mine}} (jūs){{end}} | {{.Rating}} / 5 | {{.Date}}
+      {{if and $.LoggedIn (not .Mine)}} | <a href="/reviews/{{.ID}}/report">Ziņot</a>{{end}}
       {{if .Body}}<p style="white-space:pre-wrap">{{.Body}}</p>{{end}}
     </div>
   {{end}}

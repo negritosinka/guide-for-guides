@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ziņojumi - Administrācija</title>
+</head>
+<body>
+  <h1>Ziņojumi un sūdzības</h1>
+  <p><a href="/admin">Atpakaļ</a></p>
+
+  {{range .Rows}}
+    <div style="border:1px solid #888; padding:10px; margin:10px 0">
+      <p>
+        <strong>#{{.ID}}</strong> |
+        {{if eq .Kind "bug"}}Kļūdas ziņojums{{else}}Sūdzība par atsauksmi{{end}} |
+        {{.Date}} | iesniedza: lietotājs #{{.ReporterID}}
+      </p>
+      <p>Iemesls: {{.Reason}}</p>
+      {{if .Details}}<p style="white-space:pre-wrap">{{.Details}}</p>{{end}}
+
+      {{if eq .Kind "content"}}
+        <p>Atsauksme #{{.ReviewID}} (autors: lietotājs #{{.AuthorID}}), vērtējums {{.Rating}}/5:</p>
+        <blockquote style="white-space:pre-wrap">{{.ReviewBody}}</blockquote>
+      {{end}}
+
+      <form method="post" action="/admin/reports/{{.ID}}/resolve">
+        {{if eq .Kind "content"}}
+          <button type="submit" name="action" value="remove">Noņemt atsauksmi (autoram karodziņš)</button>
+        {{else}}
+          <button type="submit" name="action" value="done">Atzīmēt kā izskatītu</button>
+        {{end}}
+        <button type="submit" name="action" value="dismiss">Noraidīt</button>
+      </form>
+    </div>
+  {{else}}
+    <p>Nav atvērtu ziņojumu.</p>
+  {{end}}
+</body>
+</html>
