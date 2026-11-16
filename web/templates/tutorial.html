@@ -29,6 +29,11 @@
   {{else}}
     <p>Lai saglabātu grāmatzīmi vai uzrakstītu atsauksmi, lūdzu, <a href="/login">ieejiet</a>.</p>
   {{end}}
+  
+  <p>
+    {{if .LoggedIn}}<a href="/tutorials/{{.ID}}/report">Ziņot par šo pamācību</a> | {{end}}
+    <a href="/dmca?tutorial={{.ID}}">Autortiesību sūdzība (DMCA)</a>
+  </p>
 
   <h2>Atsauksmes</h2>
 

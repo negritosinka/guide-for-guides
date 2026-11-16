@@ -76,7 +76,8 @@ const searchFrom = `
 	JOIN sources s ON s.id = t.source_id
 	JOIN tutorial_versions v ON v.tutorial_id = t.id
 	 AND v.id = (SELECT max(id) FROM tutorial_versions WHERE tutorial_id = t.id)
-	WHERE b.id = ANY($1) AND v.title ILIKE $2`
+	WHERE b.id = ANY($1) AND v.title ILIKE $2
+	  AND t.hidden_at IS NULL`
 
 // Выбранные фильтры: раздел ($3), сайт ($4), категория ($5)
 const searchFilters = `

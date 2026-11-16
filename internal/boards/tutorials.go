@@ -28,7 +28,7 @@ func (h *Handler) tutorialsOf(r *http.Request, slug string) []TutorialRow {
 		 JOIN boards b ON b.id = t.board_id
 		 JOIN sources s ON s.id = t.source_id
 		 JOIN tutorial_versions v ON v.tutorial_id = t.id
-		 WHERE b.slug = $1
+		 WHERE b.slug = $1 AND t.hidden_at IS NULL
 		   AND v.id = (SELECT max(id) FROM tutorial_versions WHERE tutorial_id = t.id)
 		 ORDER BY t.id DESC LIMIT 50`, slug)
 	if err != nil {

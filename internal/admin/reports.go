@@ -14,16 +14,18 @@ import (
 // ---------- Очередь жалоб ----------
 
 type ReportRow struct {
-	ID         int64
-	Kind       string // "content" или "bug"
-	Reason     string
-	Details    string
-	Date       string
-	ReporterID int64
-	ReviewID   int64
-	Rating     int
-	ReviewBody string
-	AuthorID   int64
+	ID            int64
+	Kind          string // "content" или "bug"
+	Reason        string
+	Details       string
+	Date          string
+	ReporterID    int64
+	ReviewID      int64
+	Rating        int
+	ReviewBody    string
+	AuthorID      int64
+	TutorialID    int64
+	TutorialTitle string
 }
 
 type ReportsData struct {
@@ -41,9 +43,12 @@ func (h *Handler) Reports(w http.ResponseWriter, r *http.Request) {
 		`SELECT rp.id, rp.kind, rp.reason, rp.details, rp.created_at,
 		        COALESCE(rp.reporter_id, 0),
 		        COALESCE(rv.id, 0), COALESCE(rv.rating, 0),
-		        COALESCE(rv.body, ''), COALESCE(rv.user_id, 0)
+		        COALESCE(rv.body, ''), COALESCE(rv.user_id, 0),
+		        COALESCE(rp.tutorial_id, 0), COALESCE(tv.title, '')
 		 FROM reports rp
 		 LEFT JOIN reviews rv ON rv.id = rp.review_id
+		 LEFT JOIN tutorial_versions tv ON tv.tutorial_id = rp.tutorial_id
+		  AND tv.id = (SELECT max(id) FROM tutorial_versions WHERE tutorial_id = rp.tutorial_id)
 		 WHERE rp.status = 'open'
 		 ORDER BY rp.id LIMIT 100`)
 	if err != nil {
@@ -58,7 +63,8 @@ func (h *Handler) Reports(w http.ResponseWriter, r *http.Request) {
 		var row ReportRow
 		var created time.Time
 		err := rows.Scan(&row.ID, &row.Kind, &row.Reason, &row.Details, &created,
-			&row.ReporterID, &row.ReviewID, &row.Rating, &row.ReviewBody, &row.AuthorID)
+			&row.ReporterID, &row.ReviewID, &row.Rating, &row.ReviewBody, &row.AuthorID,
+			&row.TutorialID, &row.TutorialTitle)
 		if err != nil {
 			log.Println("ошибка чтения строки:", err)
 			continue
@@ -89,12 +95,13 @@ func (h *Handler) ResolveReport(w http.ResponseWriter, r *http.Request) {
 	}
 	action := r.FormValue("action")
 
-	// Достаём открытую жалобу
+	// Достаём открытую жалобу. Указатели, потому что поля могут быть пустыми (NULL).
 	var kind string
-	var reviewID *int64 // указатель, потому что у баг-репорта отзыва нет
+	var reviewID *int64
+	var tutorialID *int64
 	err = h.Pool.QueryRow(r.Context(),
-		`SELECT kind, review_id FROM reports WHERE id = $1 AND status = 'open'`,
-		reportID).Scan(&kind, &reviewID)
+		`SELECT kind, review_id, tutorial_id FROM reports WHERE id = $1 AND status = 'open'`,
+		reportID).Scan(&kind, &reviewID, &tutorialID)
 	if err == pgx.ErrNoRows {
 		http.Redirect(w, r, "/admin/reports", http.StatusSeeOther) // уже обработана
 		return
@@ -105,8 +112,11 @@ func (h *Handler) ResolveReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if action == "remove" && kind == "content" && reviewID != nil {
+	if action == "remove" && reviewID != nil {
 		err = h.removeReview(r.Context(), staffID, *reviewID)
+	} else if action == "hide" && tutorialID != nil {
+		err = h.hideTutorial(r.Context(), staffID, *tutorialID,
+			"report #"+strconv.FormatInt(reportID, 10))
 	} else if action == "dismiss" || (action == "done" && kind == "bug") {
 		status := "dismissed"
 		if action == "done" {

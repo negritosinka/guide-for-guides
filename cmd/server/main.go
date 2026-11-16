@@ -132,6 +132,16 @@ func main() {
 	mux.HandleFunc("GET /admin/appeals", adminHandler.Appeals)
 	mux.HandleFunc("POST /admin/appeals/{id}/resolve", adminHandler.ResolveAppeal)
 
+	mux.HandleFunc("GET /dmca", moderationHandler.DMCAForm)
+	mux.HandleFunc("POST /dmca", moderationHandler.DMCASubmit)
+	mux.HandleFunc("GET /tutorials/{id}/report", moderationHandler.TutorialReportForm)
+	mux.HandleFunc("POST /tutorials/{id}/report", moderationHandler.TutorialReportSubmit)
+
+	mux.HandleFunc("GET /admin/dmca", adminHandler.DMCAList)
+	mux.HandleFunc("POST /admin/dmca/{id}/resolve", adminHandler.DMCAResolve)
+	mux.HandleFunc("GET /admin/hidden", adminHandler.HiddenList)
+	mux.HandleFunc("POST /admin/hidden/{id}/restore", adminHandler.Restore)
+
 	// {$} значит "только главная страница"
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "Sveiki! Guide for Guides darbojas. Dodieties uz /search, /boards, /register vai /login")

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Autortiesību paziņojums (DMCA) - Guide for Guides</title>
+</head>
+<body>
+  <h1>Autortiesību paziņojums (DMCA)</h1>
+
+  {{if .Done}}
+    <p>Paldies! Jūsu paziņojums ir saņemts, un to izskatīs vietnes personāls.</p>
+  {{else}}
+    <p>
+      Šī vietne glabā tikai pamācību nosaukumus un saites uz oriģinālajām lapām.
+      Ja uzskatāt, ka kāda ieraksta publicēšana pārkāpj jūsu autortiesības, aizpildiet veidlapu.
+    </p>
+
+    {{if .Error}}<p style="color:red">{{.Error}}</p>{{end}}
+
+    <form method="post" action="/dmca">
+      <p>
+        <label>Pilns vārds, uzvārds<br>
+        <input type="text" name="name" value="{{.Name}}" maxlength="100" required></label>
+      </p>
+      <p>
+        <label>E-pasts saziņai<br>
+        <input type="email" name="email" value="{{.Email}}" required></label>
+      </p>
+      <p>
+        <label>Pamācības numurs (redzams adresē /tutorials/NUMURS)<br>
+        <input type="number" name="tutorial_id" value="{{.TutorialID}}" min="1" required></label>
+      </p>
+      <p>
+        <label>Aizsargātā darba apraksts un kāpēc ieraksts to pārkāpj (20 līdz 2000 rakstzīmes)<br>
+        <textarea name="description" rows="6" cols="60" maxlength="2000" required>{{.Description}}</textarea></label>
+      </p>
+      <p>
+        <label>Oriģinālā darba adrese (nav obligāta)<br>
+        <input type="text" name="original_url" value="{{.OriginalURL}}" maxlength="300"></label>
+      </p>
+      <p>
+        <label><input type="checkbox" name="good_faith" required>
+        Es godprātīgi uzskatu, ka šī ieraksta izmantošana nav atļauta.</label>
+      </p>
+      <p>
+        <label><input type="checkbox" name="accurate" required>
+        Šajā paziņojumā norādītā informācija ir precīza, un es esmu tiesību īpašnieks vai tā pilnvarotais pārstāvis.</label>
+      </p>
+      <p>
+        <label>Paraksts (ierakstiet savu pilno vārdu)<br>
+        <input type="text" name="signature" value="{{.Signature}}" maxlength="100" required></label>
+      </p>
+
+      <!-- Slazds robotiem: cilvēki šo lauku neredz -->
+      <div style="display:none">
+        <input type="text" name="website" tabindex="-1" autocomplete="off">
+      </div>
+
+      <button type="submit">Iesniegt paziņojumu</button>
+    </form>
+  {{end}}
+
+  <p><a href="/">Uz sākumlapu</a></p>
+</body>
+</html>

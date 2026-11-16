@@ -70,7 +70,7 @@ func (h *Handler) loadTutorial(w http.ResponseWriter, r *http.Request) (tutorial
 		 JOIN sources s ON s.id = t.source_id
 		 JOIN tutorial_versions v ON v.tutorial_id = t.id
 		  AND v.id = (SELECT max(id) FROM tutorial_versions WHERE tutorial_id = t.id)
-		 WHERE t.id = $1`, id).
+		 WHERE t.id = $1 AND t.hidden_at IS NULL`, id).
 		Scan(&t.Title, &t.URL, &t.Source, &t.Categories,
 			&t.Board.Slug, &t.Board.Name, &t.Board.Description, &t.Board.Status, &t.Board.RequiredRole)
 	if err == pgx.ErrNoRows {
@@ -325,7 +325,7 @@ func (h *Handler) Bookmarks(w http.ResponseWriter, r *http.Request) {
 		 JOIN sources s ON s.id = t.source_id
 		 JOIN tutorial_versions v ON v.tutorial_id = t.id
 		  AND v.id = (SELECT max(id) FROM tutorial_versions WHERE tutorial_id = t.id)
-		 WHERE bm.user_id = $1 AND b.id = ANY($2)
+		 WHERE bm.user_id = $1 AND b.id = ANY($2) AND t.hidden_at IS NULL
 		 ORDER BY bm.created_at DESC`, userID, ids)
 	if err != nil {
 		log.Println("ошибка базы:", err)

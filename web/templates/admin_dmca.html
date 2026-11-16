@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DMCA - Administrācija</title>
+</head>
+<body>
+  <h1>DMCA paziņojumi</h1>
+  <p><a href="/admin">Atpakaļ</a></p>
+
+  {{range .Rows}}
+    <div style="border:1px solid #888; padding:10px; margin:10px 0">
+      <p><strong>#{{.ID}}</strong> | {{.Date}}</p>
+      <p>Iesniedzējs: {{.Name}} ({{.Email}}), paraksts: {{.Signature}}</p>
+      <p>
+        Pamācība #{{.TutorialID}}: {{.Title}}
+        (<a href="/tutorials/{{.TutorialID}}">mūsu lapa</a>,
+        <a href="{{.URL}}" target="_blank" rel="noopener nofollow">oriģināls</a>)
+        {{if .Hidden}} | jau paslēpta{{end}}
+      </p>
+      <p>Apraksts:</p>
+      <p style="white-space:pre-wrap">{{.Description}}</p>
+      {{if .OriginalURL}}<p>Oriģinālā darba adrese: {{.OriginalURL}}</p>{{end}}
+
+      <form method="post" action="/admin/dmca/{{.ID}}/resolve">
+        <button type="submit" name="action" value="accept">Apstiprināt (paslēpt pamācību)</button>
+        <button type="submit" name="action" value="reject">Noraidīt</button>
+      </form>
+    </div>
+  {{else}}
+    <p>Nav atvērtu paziņojumu.</p>
+  {{end}}
+</body>
+</html>
