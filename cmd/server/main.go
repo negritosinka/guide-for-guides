@@ -15,6 +15,7 @@ import (
 	"guide-for-guides/internal/boards"
 	"guide-for-guides/internal/db"
 	"guide-for-guides/internal/moderation"
+	"guide-for-guides/internal/privacy"
 	"guide-for-guides/internal/scanner"
 	"guide-for-guides/migrations"
 	"guide-for-guides/web"
@@ -72,6 +73,11 @@ func main() {
 
 	adminHandler := &admin.Handler{Pool: pool, Tmpl: tmpl, Auth: authHandler, MaxFlags: maxFlags}
 	moderationHandler := &moderation.Handler{Pool: pool, Tmpl: tmpl, Auth: authHandler}
+
+	privacyHandler := &privacy.Handler{Pool: pool, Tmpl: tmpl, Auth: authHandler}
+
+	// Очистка устаревших данных: сразу и потом раз в сутки
+	go privacy.ScheduleCleanup(ctx, pool, 24*time.Hour)
 
 	// Адреса сайта: какой адрес какая функция обрабатывает
 	mux := http.NewServeMux()
@@ -141,6 +147,11 @@ func main() {
 	mux.HandleFunc("POST /admin/dmca/{id}/resolve", adminHandler.DMCAResolve)
 	mux.HandleFunc("GET /admin/hidden", adminHandler.HiddenList)
 	mux.HandleFunc("POST /admin/hidden/{id}/restore", adminHandler.Restore)
+
+	mux.HandleFunc("GET /privacy", privacyHandler.Policy)
+	mux.HandleFunc("GET /account/export", privacyHandler.Export)
+	mux.HandleFunc("GET /account/delete", privacyHandler.DeleteForm)
+	mux.HandleFunc("POST /account/delete", privacyHandler.DeleteSubmit)
 
 	// {$} значит "только главная страница"
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dzēst kontu - Guide for Guides</title>
+</head>
+<body>
+  <h1>Dzēst kontu</h1>
+
+  <p>
+    Dzēšot kontu, tiks neatgriezeniski dzēsti: e-pasta adrese, parole, grāmatzīmes, atsauksmes,
+    apelācijas un karodziņi. Jūsu iesniegtās sūdzības tiks saglabātas bez saistības ar jums.
+  </p>
+
+  {{if .Error}}<p style="color:red">{{.Error}}</p>{{end}}
+
+  <form method="post" action="/account/delete">
+    <p>
+      <label>Ievadiet paroli, lai apstiprinātu<br>
+      <input type="password" name="password" required></label>
+    </p>
+    <p>
+      <label><input type="checkbox" name="confirm" required>
+      Es saprotu, ka šo darbību nevar atsaukt.</label>
+    </p>
+    <button type="submit">Dzēst manu kontu</button>
+  </form>
+
+  <p><a href="/account">Atpakaļ</a></p>
+</body>
+</html>
