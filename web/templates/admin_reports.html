@@ -13,21 +13,29 @@
     <div style="border:1px solid #888; padding:10px; margin:10px 0">
       <p>
         <strong>#{{.ID}}</strong> |
-        {{if eq .Kind "bug"}}Kļūdas ziņojums{{else}}Sūdzība par atsauksmi{{end}} |
+        {{if eq .Kind "bug"}}Kļūdas ziņojums{{else if .TutorialID}}Sūdzība par pamācību{{else}}Sūdzība par atsauksmi{{end}} |
         {{.Date}} | iesniedza: lietotājs #{{.ReporterID}}
       </p>
       <p>Iemesls: {{.Reason}}</p>
       {{if .Details}}<p style="white-space:pre-wrap">{{.Details}}</p>{{end}}
 
-      {{if eq .Kind "content"}}
+      {{if .TutorialID}}
+        <p>Pamācība #{{.TutorialID}}: {{.TutorialTitle}} (<a href="/tutorials/{{.TutorialID}}">atvērt</a>)</p>
+      {{end}}
+
+      {{if .ReviewID}}
         <p>Atsauksme #{{.ReviewID}} (autors: lietotājs #{{.AuthorID}}), vērtējums {{.Rating}}/5:</p>
         <blockquote style="white-space:pre-wrap">{{.ReviewBody}}</blockquote>
       {{end}}
 
       <form method="post" action="/admin/reports/{{.ID}}/resolve">
-        {{if eq .Kind "content"}}
+        {{if .ReviewID}}
           <button type="submit" name="action" value="remove">Noņemt atsauksmi (autoram karodziņš)</button>
-        {{else}}
+        {{end}}
+        {{if .TutorialID}}
+          <button type="submit" name="action" value="hide">Paslēpt pamācību</button>
+        {{end}}
+        {{if eq .Kind "bug"}}
           <button type="submit" name="action" value="done">Atzīmēt kā izskatītu</button>
         {{end}}
         <button type="submit" name="action" value="dismiss">Noraidīt</button>

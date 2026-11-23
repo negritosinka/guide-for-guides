@@ -56,7 +56,11 @@ func main() {
 	tmpl := template.Must(template.ParseFS(web.FS, "templates/*.html"))
 
 	// Адрес сайта для ссылок в письмах. Локально это localhost.
+	// Адрес сайта для ссылок в письмах. Порядок: BASE_URL, потом адрес от Render, потом localhost.
 	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		baseURL = os.Getenv("RENDER_EXTERNAL_URL")
+	}
 	if baseURL == "" {
 		baseURL = "http://localhost:8080"
 	}
@@ -158,6 +162,22 @@ func main() {
 		fmt.Fprint(w, "Sveiki! Guide for Guides darbojas. Dodieties uz /search, /boards, /register vai /login")
 	})
 
-	log.Println("listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	// Render сообщает порт через переменную PORT
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	// Сервер с таймаутами: медленные или зависшие клиенты не будут держать соединения вечно
+	server := &http.Server{
+		Addr:              ":" + port,
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       120 * time.Second,
+	}
+
+	log.Println("listening on :" + port)
+	log.Fatal(server.ListenAndServe())
 }

@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -11,7 +12,20 @@ import (
 const maxFailures = 5
 
 // clientIP достаёт IP-адрес пользователя (без порта)
+// clientIP достаёт IP-адрес пользователя (без порта).
+// За прокси (на Render) настоящий адрес лежит в заголовке X-Forwarded-For.
 func clientIP(r *http.Request) string {
+	if os.Getenv("TRUST_PROXY") == "true" {
+		forwarded := r.Header.Get("X-Forwarded-For")
+		if forwarded != "" {
+			// Заголовок выглядит как "клиент, прокси1, прокси2". Берём первый.
+			first := strings.TrimSpace(strings.Split(forwarded, ",")[0])
+			if net.ParseIP(first) != nil {
+				return first
+			}
+		}
+	}
+
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return r.RemoteAddr
